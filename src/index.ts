@@ -5,7 +5,8 @@ import cors, { CorsOptions } from "cors";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import { createServer } from "http";
-import { setupSocket } from "./socket";
+import { setupSocket } from "./sockets/index";
+import registerRoutes from "./routes";
 
 const app = express();
 
@@ -24,6 +25,8 @@ export const corsOptions: CorsOptions = {
 app.use(cors(corsOptions));
 
 app.use(express.json());
+
+registerRoutes(app);
 
 app.use(
   helmet({

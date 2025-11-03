@@ -32,7 +32,7 @@ export const loginUser = async (data: LoginBody): Promise<AuthResponse> => {
     const isMatch = await bcrypt.compare(data.password, user.password);
     if (!isMatch) throw new Error("Invalid credentials");
 
-    const token = generateToken({ id: user._id, email: user.email });
+    const token = generateToken({ id: user._id, fullName: user.fullName, email: user.email });
 
     return {
         _id: user._id.toString(),

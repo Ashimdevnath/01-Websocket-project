@@ -1,9 +1,13 @@
 import { Request, Response, NextFunction } from "express";
-import { verifyToken } from "../helper/jwtHelper";
+import { verifyAccessToken } from "../helper/jwtHelper";
 import { errorResponse } from "../utils/responseHandler";
 
 export interface AuthenticatedRequest extends Request {
-  user?: any; // You can strongly type this if you know your token payload structure
+  user?: {
+    userId: string;
+    iat?: number;
+    exp?: number;
+  };
 }
 
 export const authenticate = (
@@ -12,23 +16,38 @@ export const authenticate = (
   next: NextFunction
 ): void => {
   try {
-    const authHeader = req.headers.authorization;
+    // Read Access Token from HttpOnly Cookie
+    const token = req.cookies?.accessToken;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      errorResponse(res, "Unauthorized: Token missing or invalid format", 401);
+    if (!token) {
+      errorResponse(res, "Unauthorized: Access token missing", 401);
       return;
     }
 
-    const token = authHeader.split(" ")[1];
-    const decoded = verifyToken(token);
-    if (!decoded) {
-      errorResponse(res, "Unauthorized: Invalid token", 401);
+    // Verify JWT
+    const decoded = verifyAccessToken(token);
+
+    if (!decoded || !decoded.userId) {
+      errorResponse(res, "Unauthorized: Invalid access token", 401);
       return;
     }
-    req.user = decoded;
+
+    // Attach decoded user data to request
+    req.user = {
+      userId: decoded.userId,
+      iat: decoded.iat,
+      exp: decoded.exp,
+    };
+
     next();
-  } catch (error) {
-    console.error("JWT verification error:", error);
-    errorResponse(res, "Unauthorized: Invalid token", 401);
+  } catch (error: any) {
+    console.error("JWT Verification Error:", error.message);
+
+    if (error?.name === "TokenExpiredError") {
+      errorResponse(res, "Access token expired", 401);
+      return;
+    }
+
+    errorResponse(res, "Unauthorized: Invalid or expired token", 401);
   }
 };

@@ -9,13 +9,28 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loginController = exports.registerController = void 0;
+exports.getProfileController = exports.logoutController = exports.refreshController = exports.loginController = exports.registerController = void 0;
 const auth_service_1 = require("../service/auth.service");
 const responseHandler_1 = require("../utils/responseHandler");
+const env_config_1 = require("../config/env.config");
 const registerController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield (0, auth_service_1.registerUser)(req.body);
-        return (0, responseHandler_1.successResponse)(res, "User registered successfully", result, 201);
+        const { accessToken, refreshToken, user } = yield (0, auth_service_1.register)(req.body, req);
+        res.cookie("accessToken", accessToken, {
+            httpOnly: true,
+            secure: env_config_1.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 1000 * 60 * 60 * 24,
+        });
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: env_config_1.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 1000 * 60 * 60 * 24 * 7,
+        });
+        return (0, responseHandler_1.successResponse)(res, "User registered successfully", {
+            user
+        }, 201);
     }
     catch (err) {
         return (0, responseHandler_1.errorResponse)(res, err.message, 400);
@@ -24,11 +39,68 @@ const registerController = (req, res) => __awaiter(void 0, void 0, void 0, funct
 exports.registerController = registerController;
 const loginController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield (0, auth_service_1.loginUser)(req.body);
-        return (0, responseHandler_1.successResponse)(res, "User logged in successfully", result, 200);
+        const { email, password } = req.body;
+        const { accessToken, refreshToken, user } = yield (0, auth_service_1.login)(email, password, req);
+        res.cookie("accessToken", accessToken, {
+            httpOnly: true,
+            secure: env_config_1.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 1000 * 60 * 60 * 24,
+        });
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: env_config_1.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 1000 * 60 * 60 * 24 * 7,
+        });
+        return (0, responseHandler_1.successResponse)(res, "Login successful", {
+            user: {
+                id: user._id,
+                fullName: user.fullName,
+                email: user.email,
+            }
+        }, 200);
     }
     catch (err) {
         return (0, responseHandler_1.errorResponse)(res, err.message, 400);
     }
 });
 exports.loginController = loginController;
+const refreshController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { refreshToken } = req.body;
+        const tokens = yield (0, auth_service_1.refresh)(refreshToken, req);
+        return (0, responseHandler_1.successResponse)(res, "Token refreshed", tokens, 200);
+    }
+    catch (err) {
+        return (0, responseHandler_1.errorResponse)(res, err.message, 401);
+    }
+});
+exports.refreshController = refreshController;
+const logoutController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { refreshToken } = req.body;
+        yield (0, auth_service_1.logout)(refreshToken);
+        return (0, responseHandler_1.successResponse)(res, "Logged out successfully", null, 200);
+    }
+    catch (err) {
+        return (0, responseHandler_1.errorResponse)(res, err.message, 400);
+    }
+});
+exports.logoutController = logoutController;
+const getProfileController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId;
+        if (!userId) {
+            return (0, responseHandler_1.errorResponse)(res, "Unauthorized", 401);
+        }
+        const user = yield (0, auth_service_1.getProfile)(userId);
+        return (0, responseHandler_1.successResponse)(res, "Profile fetched successfully", user, 200);
+    }
+    catch (error) {
+        console.error("Get Profile Error:", error.message);
+        return (0, responseHandler_1.errorResponse)(res, error.message || "Failed to fetch profile", 500);
+    }
+});
+exports.getProfileController = getProfileController;

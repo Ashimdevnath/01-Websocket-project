@@ -33,28 +33,41 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserModel = void 0;
+exports.RefreshTokenModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
-const userSchema = new mongoose_1.Schema({
-    fullName: {
+const refreshTokenSchema = new mongoose_1.Schema({
+    user: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "User", required: true
+    },
+    tokenId: {
         type: String,
         required: true,
-        trim: true,
-        minlength: 3,
+        unique: true
     },
-    email: {
+    expiresAt: {
+        type: Date,
+        required: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    replacedByTokenId: {
         type: String,
-        required: true,
-        unique: true,
-        lowercase: true,
-        trim: true,
+        default: ""
     },
-    password: {
+    revoked: {
+        type: Boolean,
+        default: false
+    },
+    ip: {
         type: String,
-        required: true,
-        minlength: 6,
+        default: null
     },
-}, {
-    timestamps: true,
+    userAgent: {
+        type: String,
+        default: null
+    },
 });
-exports.UserModel = mongoose_1.default.model("User", userSchema);
+exports.RefreshTokenModel = mongoose_1.default.model("RefreshToken", refreshTokenSchema);

@@ -1,4 +1,3 @@
-// src/modules/auth/auth.model.ts
 import mongoose, { Schema } from "mongoose";
 import { IUser } from "../types/auth.type";
 

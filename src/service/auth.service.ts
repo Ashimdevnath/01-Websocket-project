@@ -9,39 +9,43 @@ import {
 import { Types } from "mongoose";
 
 export const register = async (data: any, req: any) => {
-  const { fullName, email, password } = data;
+    const { fullName, email, password } = data;
 
-  const existing = await UserModel.findOne({ email });
-  if (existing) throw new Error("Email already exists");
+    const existing = await UserModel.findOne({ email });
+    if (existing) throw new Error("Email already exists");
 
-  const hashed = await bcrypt.hash(password, 10);
+    const hashed = await bcrypt.hash(password, 10);
 
-  const user = await UserModel.create({
-    fullName,
-    email,
-    password: hashed,
-  });
+    const user = await UserModel.create({
+        fullName,
+        email,
+        password: hashed,
+    });
 
-  // Access Token
-  const accessToken = signAccessToken({ userId: user._id });
+    // Access Token
+    const accessToken = signAccessToken({
+        userId: user._id,
+        fullName: user.fullName,
+        email: user.email
+    });
 
-  // Refresh Token + JTI
-  const { token: refreshToken, jti } = signRefreshToken({
-    userId: user._id.toString(),
-  });
+    // Refresh Token + JTI
+    const { token: refreshToken, jti } = signRefreshToken({
+        userId: user._id.toString(),
+    });
 
-  await RefreshTokenModel.create({
-    user: user._id,
-    tokenId: jti,
-    expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
-    ip: req.ip,
-    userAgent: req.headers["user-agent"],
-  });
+    await RefreshTokenModel.create({
+        user: user._id,
+        tokenId: jti,
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+        ip: req.ip,
+        userAgent: req.headers["user-agent"],
+    });
 
-  const safeUser = user.toObject();
-  delete safeUser.password;
+    const safeUser = user.toObject();
+    delete safeUser.password;
 
-  return { accessToken, refreshToken, user: safeUser };
+    return { accessToken, refreshToken, user: safeUser };
 };
 
 
@@ -57,7 +61,11 @@ export const login = async (
     if (!isMatch) throw new Error("Invalid email or password");
 
     // Access Token
-    const accessToken = signAccessToken({ userId: user._id });
+    const accessToken = signAccessToken({
+        userId: user._id,
+        fullName: user.fullName,
+        email: user.email
+    });
 
     // Refresh Token
     const { token: refreshToken, jti } = signRefreshToken({
@@ -82,7 +90,7 @@ export const refresh = async (oldRefreshToken: string, req: any) => {
     const decoded = verifyRefreshToken<{ userId: string; jti: string }>(
         oldRefreshToken
     );
-    console.log("decoded",decoded);
+    console.log("decoded", decoded);
 
     // Find token in DB
     const storedToken = await RefreshTokenModel.findOne({
@@ -132,10 +140,10 @@ export const logout = async (refreshToken: string) => {
 };
 
 export const getProfile = async (userId: string) => {
-  const user = await UserModel.findById(userId).lean();
+    const user = await UserModel.findById(userId).lean();
 
-  if (!user) throw new Error("User not found");
+    if (!user) throw new Error("User not found");
 
-  delete user.password; 
-  return user;
+    delete user.password;
+    return user;
 };

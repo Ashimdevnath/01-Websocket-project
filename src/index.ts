@@ -7,6 +7,7 @@ import helmet from "helmet";
 import { createServer } from "http";
 import { setupSocket } from "./sockets/index";
 import registerRoutes from "./routes";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
@@ -25,6 +26,7 @@ export const corsOptions: CorsOptions = {
 app.use(cors(corsOptions));
 
 app.use(express.json());
+app.use(cookieParser());
 
 registerRoutes(app);
 

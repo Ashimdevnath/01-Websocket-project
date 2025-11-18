@@ -5,6 +5,8 @@ import { errorResponse } from "../utils/responseHandler";
 export interface AuthenticatedRequest extends Request {
   user?: {
     userId: string;
+    fullName: string;
+    email: string;
     iat?: number;
     exp?: number;
   };
@@ -18,7 +20,6 @@ export const authenticate = (
   try {
     // Read Access Token from HttpOnly Cookie
     const token = req.cookies?.accessToken;
-
     if (!token) {
       errorResponse(res, "Unauthorized: Access token missing", 401);
       return;
@@ -35,10 +36,11 @@ export const authenticate = (
     // Attach decoded user data to request
     req.user = {
       userId: decoded.userId,
+      fullName: decoded.fullName,
+      email: decoded.email,
       iat: decoded.iat,
       exp: decoded.exp,
     };
-
     next();
   } catch (error: any) {
     console.error("JWT Verification Error:", error.message);

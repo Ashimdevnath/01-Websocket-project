@@ -10,15 +10,15 @@ export const registerController = async (req: Request, res: Response) => {
 
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
-            secure: NODE_ENV === "production",
-            sameSite: "strict",
+            secure: NODE_ENV === "development",
+            sameSite: "none",
             maxAge: 1000 * 60 * 60 * 24, 
         });
 
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
-            secure: NODE_ENV === "production",
-            sameSite: "strict",
+            secure: NODE_ENV === "development",
+            sameSite: "none",
             maxAge: 1000 * 60 * 60 * 24 * 7, 
         });
 
@@ -41,14 +41,15 @@ export const loginController = async (req: Request, res: Response) => {
 
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
-            secure: NODE_ENV === "production", 
-            sameSite: "strict",
+            secure: NODE_ENV === "development", 
+            sameSite: "none",
             maxAge: 1000 * 60 * 60 * 24, 
         });
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
-            secure: NODE_ENV === "production",
-            sameSite: "strict",
+
+            secure: NODE_ENV === "development",
+            sameSite: "none",
             maxAge: 1000 * 60 * 60 * 24 * 7, 
         });
 

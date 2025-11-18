@@ -12,6 +12,7 @@ const helmet_1 = __importDefault(require("helmet"));
 const http_1 = require("http");
 const index_1 = require("./sockets/index");
 const routes_1 = __importDefault(require("./routes"));
+const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const app = (0, express_1.default)();
 exports.corsOptions = {
     origin: (origin, callback) => {
@@ -27,6 +28,7 @@ exports.corsOptions = {
 };
 app.use((0, cors_1.default)(exports.corsOptions));
 app.use(express_1.default.json());
+app.use((0, cookie_parser_1.default)());
 (0, routes_1.default)(app);
 app.use((0, helmet_1.default)({
     contentSecurityPolicy: false,

@@ -21,6 +21,8 @@ const authenticate = (req, res, next) => {
         // Attach decoded user data to request
         req.user = {
             userId: decoded.userId,
+            fullName: decoded.fullName,
+            email: decoded.email,
             iat: decoded.iat,
             exp: decoded.exp,
         };

@@ -18,14 +18,14 @@ const registerController = (req, res) => __awaiter(void 0, void 0, void 0, funct
         const { accessToken, refreshToken, user } = yield (0, auth_service_1.register)(req.body, req);
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
-            secure: env_config_1.NODE_ENV === "production",
-            sameSite: "strict",
+            secure: env_config_1.NODE_ENV === "development",
+            sameSite: "none",
             maxAge: 1000 * 60 * 60 * 24,
         });
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
-            secure: env_config_1.NODE_ENV === "production",
-            sameSite: "strict",
+            secure: env_config_1.NODE_ENV === "development",
+            sameSite: "none",
             maxAge: 1000 * 60 * 60 * 24 * 7,
         });
         return (0, responseHandler_1.successResponse)(res, "User registered successfully", {
@@ -43,14 +43,14 @@ const loginController = (req, res) => __awaiter(void 0, void 0, void 0, function
         const { accessToken, refreshToken, user } = yield (0, auth_service_1.login)(email, password, req);
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
-            secure: env_config_1.NODE_ENV === "production",
-            sameSite: "strict",
+            secure: env_config_1.NODE_ENV === "development",
+            sameSite: "none",
             maxAge: 1000 * 60 * 60 * 24,
         });
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
-            secure: env_config_1.NODE_ENV === "production",
-            sameSite: "strict",
+            secure: env_config_1.NODE_ENV === "development",
+            sameSite: "none",
             maxAge: 1000 * 60 * 60 * 24 * 7,
         });
         return (0, responseHandler_1.successResponse)(res, "Login successful", {

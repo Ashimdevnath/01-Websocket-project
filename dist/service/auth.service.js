@@ -30,7 +30,11 @@ const register = (data, req) => __awaiter(void 0, void 0, void 0, function* () {
         password: hashed,
     });
     // Access Token
-    const accessToken = (0, jwtHelper_1.signAccessToken)({ userId: user._id });
+    const accessToken = (0, jwtHelper_1.signAccessToken)({
+        userId: user._id,
+        fullName: user.fullName,
+        email: user.email
+    });
     // Refresh Token + JTI
     const { token: refreshToken, jti } = (0, jwtHelper_1.signRefreshToken)({
         userId: user._id.toString(),
@@ -55,7 +59,11 @@ const login = (email, password, req) => __awaiter(void 0, void 0, void 0, functi
     if (!isMatch)
         throw new Error("Invalid email or password");
     // Access Token
-    const accessToken = (0, jwtHelper_1.signAccessToken)({ userId: user._id });
+    const accessToken = (0, jwtHelper_1.signAccessToken)({
+        userId: user._id,
+        fullName: user.fullName,
+        email: user.email
+    });
     // Refresh Token
     const { token: refreshToken, jti } = (0, jwtHelper_1.signRefreshToken)({
         userId: user._id.toString(),
